@@ -4,60 +4,31 @@ import json
 
 
 def fetch_wikipedia_page(url):
-    """
-    Fetch the HTML content of the given Wikipedia page.
-
-    Args:
-        url (str): The URL of the Wikipedia page to fetch.
-
-    Returns:
-        str: The HTML content of the page as a string.
-
-    Raises:
-        HTTPError: If the HTTP request returned an unsuccessful status code.
-    """
-
-    return None
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.text
 
 
 def extract_title(soup):
-    """
-    Extract the title of the Wikipedia page.
-
-    Args:
-        soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
-
-    Returns:
-        str: The title of the page.
-    """
-
+    title_tag = soup.find("h1", id="firstHeading")
+    if title_tag:
+        return title_tag.get_text().strip()
     return None
 
 
 def extract_first_sentence(soup):
-    """
-    Extract the first sentence of the first paragraph on the Wikipedia page.
-
-    Args:
-        soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
-
-    Returns:
-        str: The first sentence of the first paragraph.
-    """
-
+    for p in soup.find_all("p"):
+        text = p.get_text().strip()
+        if text:
+            first_sentence = text.split(".")[0].strip() + "."
+            return first_sentence
     return None
 
 
 def save_to_json(data, filename):
-    """
-    Save the extracted data to a JSON file.
-
-    Args:
-        data (dict): The data to be saved to the JSON file.
-        filename (str): The name of the JSON file to save the data in.
-    """
-    ...
-
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
     url = "https://en.wikipedia.org/wiki/Web_scraping"
